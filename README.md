@@ -61,3 +61,6 @@ php artisan migrate --seed
 npm run build
 php artisan serve
 ```
+
+#hosting web siakad
+siakad.up.railway.app
