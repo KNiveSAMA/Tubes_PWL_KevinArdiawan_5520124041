@@ -1,0 +1,49 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Data KRS Mahasiswa</h2>
+    </x-slot>
+    <div class="py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-4 flex gap-2 flex-wrap items-center justify-between">
+                <p class="text-sm text-gray-500">Total KRS: <strong>{{ $krs_list->total() }}</strong></p>
+                <form method="GET" class="flex gap-2">
+                    <select name="npm" class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                        <option value="">-- Filter Mahasiswa --</option>
+                        @foreach($mahasiswas as $npm => $nama)
+                        <option value="{{ $npm }}" {{ request('npm') == $npm ? 'selected' : '' }}>{{ $nama }} ({{ $npm }})</option>
+                        @endforeach
+                    </select>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700">Filter</button>
+                    @if(request('npm'))
+                    <a href="{{ route('krs.export.admin', request('npm')) }}" class="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">Export PDF</a>
+                    <a href="{{ route('krs.index') }}" class="px-3 py-2 text-sm text-gray-500 border rounded-lg hover:bg-gray-50">Reset</a>
+                    @endif
+                </form>
+            </div>
+            <x-table>
+                <x-slot name="header">
+                    <tr><th>#</th><th>NPM</th><th>Nama Mahasiswa</th><th>Kode MK</th><th>Nama Mata Kuliah</th><th class="text-center">SKS</th><th>Aksi</th></tr>
+                </x-slot>
+                @forelse($krs_list as $krs)
+                <tr>
+                    <td>{{ $loop->iteration + ($krs_list->currentPage()-1) * $krs_list->perPage() }}</td>
+                    <td class="font-mono text-sm">{{ $krs->npm }}</td>
+                    <td>{{ $krs->mahasiswa->nama ?? '-' }}</td>
+                    <td><span class="font-mono bg-gray-100 px-2 py-0.5 rounded text-sm">{{ $krs->kode_matakuliah }}</span></td>
+                    <td>{{ $krs->matakuliah->nama_matakuliah ?? '-' }}</td>
+                    <td class="text-center font-bold">{{ $krs->matakuliah->sks ?? '-' }}</td>
+                    <td>
+                        <form action="{{ route('krs.destroy', $krs->id) }}" method="POST">
+                            @csrf @method('DELETE')
+                            <button type="submit" onclick="return confirm('Yakin hapus KRS ini?')" class="px-3 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700">Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="7" class="text-center text-gray-400 py-6">Belum ada data KRS.</td></tr>
+                @endforelse
+            </x-table>
+            <div class="mt-4">{{ $krs_list->links() }}</div>
+        </div>
+    </div>
+</x-app-layout>
